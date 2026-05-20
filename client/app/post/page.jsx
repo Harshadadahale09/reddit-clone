@@ -1,15 +1,8 @@
 'use client'
 
-import {
-  useEffect,
-  useState
-} from 'react'
-
+import { useEffect, useState } from 'react'
 import axios from 'axios'
-
-import {
-  useParams
-} from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 import Navbar from '../components/Navbar'
 import CommentSection from '../components/CommentSection'
@@ -83,18 +76,14 @@ export default function SinglePostPage() {
           </p>
 
           {post.imageUrl && (
-
             <img
               src={post.imageUrl}
               alt="post"
               className="rounded-2xl w-full mb-6"
             />
-
           )}
 
-          <CommentSection
-            postId={post.id}
-          />
+          <CommentSection postId={post.id} />
 
         </div>
 
