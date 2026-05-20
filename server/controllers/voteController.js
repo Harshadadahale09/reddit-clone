@@ -1,142 +1,180 @@
-const prisma = require('../config/prisma')
+const prisma =
+  require('../config/prisma')
 
-exports.votePost = async (req, res) => {
+exports.votePost =
+  async (req, res) => {
 
-  try {
+    try {
 
-    const {
-      userId,
-      postId,
-      type
-    } = req.body
+      const {
+        userId,
+        postId,
+        type
+      } = req.body
 
-    const existingVote =
-      await prisma.vote.findFirst({
+      const existingVote =
+        await prisma.vote.findFirst({
 
-        where: {
-          userId,
-          postId
-        }
+          where: {
+            userId,
+            postId
+          }
 
-      })
+        })
 
-    if (existingVote) {
+      /* REMOVE SAME VOTE */
 
-      await prisma.vote.update({
+      if (
+        existingVote &&
+        existingVote.type === type
+      ) {
 
-        where: {
-          id: existingVote.id
-        },
+        await prisma.vote.delete({
+
+          where: {
+            id: existingVote.id
+          }
+
+        })
+
+        return res.json({
+
+          message: 'Vote removed'
+
+        })
+
+      }
+
+      /* UPDATE EXISTING */
+
+      if (existingVote) {
+
+        await prisma.vote.update({
+
+          where: {
+            id: existingVote.id
+          },
+
+          data: {
+            type
+          }
+
+        })
+
+        return res.json({
+
+          message: 'Vote updated'
+
+        })
+      }
+
+      /* CREATE NEW VOTE */
+
+      await prisma.vote.create({
 
         data: {
+          userId,
+          postId,
           type
         }
 
       })
 
-      return res.json({
+      /* CREATE NOTIFICATION */
 
-        message: 'Vote updated'
+      const post =
+        await prisma.post.findUnique({
 
-      })
-    }
+          where: {
+            id: postId
+          }
 
-    await prisma.vote.create({
+        })
 
-      data: {
-        userId,
-        postId,
-        type
+      if (
+        post &&
+        post.authorId !== userId &&
+        type === 1
+      ) {
+
+        await prisma.notification.create({
+
+          data: {
+
+            type: 'vote',
+
+            message:
+              'Someone upvoted your post',
+
+            userId:
+              post.authorId
+
+          }
+
+        })
+
       }
 
-    })
+      res.json({
 
-    const post =
-      await prisma.post.findUnique({
-
-        where: {
-          id: postId
-        }
+        message: 'Vote added'
 
       })
 
-    if (
-      post &&
-      post.authorId !== userId &&
-      type === 1
-    ) {
+    } catch (error) {
 
-      await prisma.notification.create({
+      console.log(error)
 
-        data: {
+      res.status(500).json({
 
-          type: 'vote',
-
-          message:
-            'Someone upvoted your post',
-
-          userId:
-            post.authorId
-
-        }
+        error: error.message
 
       })
 
     }
-
-    res.json({
-
-      message: 'Vote added'
-
-    })
-
-  } catch (error) {
-
-    console.log(error)
-
-    res.status(500).json({
-
-      error: error.message
-
-    })
   }
-}
 
-exports.getVotes = async (req, res) => {
+exports.getVotes =
+  async (req, res) => {
 
-  try {
+    try {
 
-    const { postId } =
-      req.params
+      const { postId } =
+        req.params
 
-    const votes =
-      await prisma.vote.findMany({
+      const votes =
+        await prisma.vote.findMany({
 
-        where: {
-          postId
-        }
+          where: {
+            postId
+          }
+
+        })
+
+      const totalVotes =
+        votes.reduce(
+
+          (acc, vote) =>
+            acc + vote.type,
+
+          0
+        )
+
+      res.json({
+
+        totalVotes
 
       })
 
-    const totalVotes =
-      votes.reduce(
-        (acc, vote) =>
-          acc + vote.type,
-        0
-      )
+    } catch (error) {
 
-    res.json({
+      console.log(error)
 
-      totalVotes
+      res.status(500).json({
 
-    })
+        error: error.message
 
-  } catch (error) {
+      })
 
-    res.status(500).json({
-
-      error: error.message
-
-    })
+    }
   }
-}
