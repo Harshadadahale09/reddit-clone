@@ -1,40 +1,53 @@
 'use client'
 
+import {
+  useEffect,
+  useState
+} from 'react'
+
+import axios from 'axios'
+
+import Link from 'next/link'
+
 export default function RightSidebar() {
 
-  const communities = [
+  const [communities, setCommunities] =
+    useState([])
 
-    {
-      name: 'Technology',
-      members: '120k'
-    },
+  useEffect(() => {
 
-    {
-      name: 'Gaming',
-      members: '95k'
-    },
+    fetchCommunities()
 
-    {
-      name: 'Sports',
-      members: '80k'
-    },
+  }, [])
 
-    {
-      name: 'Movies',
-      members: '60k'
+  const fetchCommunities =
+    async () => {
+
+      try {
+
+        const res =
+          await axios.get(
+            'http://localhost:5000/api/communities'
+          )
+
+        setCommunities(
+          res.data.slice(0, 5)
+        )
+
+      } catch (error) {
+
+        console.log(error)
+
+      }
     }
-
-  ]
 
   return (
 
     <div className="sticky top-20 space-y-5">
 
-      {/* TRENDING COMMUNITIES */}
+      <div className="bg-white dark:bg-gray-900 dark:border-gray-800 rounded-2xl border p-5">
 
-      <div className="bg-white rounded-2xl border p-5">
-
-        <h2 className="font-bold text-lg mb-4">
+        <h2 className="font-bold text-lg mb-4 dark:text-white">
 
           Trending Communities
 
@@ -42,12 +55,22 @@ export default function RightSidebar() {
 
         <div className="space-y-4">
 
-          {communities.map(
-            (community, index) => (
+          {communities.length === 0 ? (
 
-              <div
-                key={index}
-                className="flex items-center justify-between"
+            <p className="text-sm text-gray-500">
+
+              No communities yet
+
+            </p>
+
+          ) : (
+
+            communities.map((community) => (
+
+              <Link
+                key={community.id}
+                href={`/community/${community.id}`}
+                className="flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-xl transition"
               >
 
                 <div className="flex items-center gap-3">
@@ -60,7 +83,7 @@ export default function RightSidebar() {
 
                   <div>
 
-                    <p className="font-semibold text-sm">
+                    <p className="font-semibold text-sm dark:text-white">
 
                       c/{community.name}
 
@@ -68,7 +91,7 @@ export default function RightSidebar() {
 
                     <p className="text-xs text-gray-500">
 
-                      {community.members} members
+                      Community
 
                     </p>
 
@@ -76,54 +99,40 @@ export default function RightSidebar() {
 
                 </div>
 
-                <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-1 rounded-full">
+                <span className="bg-blue-500 text-white text-sm px-4 py-1 rounded-full">
 
-                  Join
+                  View
 
-                </button>
+                </span>
 
-              </div>
+              </Link>
 
-            )
+            ))
+
           )}
 
         </div>
 
       </div>
 
-      {/* COMMUNITY RULES */}
+      <div className="bg-white dark:bg-gray-900 dark:border-gray-800 rounded-2xl border p-5">
 
-      <div className="bg-white rounded-2xl border p-5">
-
-        <h2 className="font-bold text-lg mb-4">
+        <h2 className="font-bold text-lg mb-4 dark:text-white">
 
           Community Rules
 
         </h2>
 
-        <ul className="space-y-3 text-sm">
+        <ul className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
 
-          <li>
-            ✅ Be respectful
-          </li>
-
-          <li>
-            ✅ No spam
-          </li>
-
-          <li>
-            ✅ Follow rules
-          </li>
-
-          <li>
-            ✅ Healthy discussion
-          </li>
+          <li>✅ Be respectful</li>
+          <li>✅ No spam</li>
+          <li>✅ Follow rules</li>
+          <li>✅ Healthy discussion</li>
 
         </ul>
 
       </div>
-
-      {/* PREMIUM CARD */}
 
       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl p-5">
 
@@ -148,6 +157,5 @@ export default function RightSidebar() {
       </div>
 
     </div>
-
   )
 }

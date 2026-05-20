@@ -56,7 +56,6 @@ export default function Navbar() {
       fetchNotifications(
         parsedUser.id
       )
-
     }
 
     const savedTheme =
@@ -67,7 +66,6 @@ export default function Navbar() {
       document.documentElement.classList.add('dark')
 
       setDarkMode(true)
-
     }
 
   }, [])
@@ -91,6 +89,30 @@ export default function Navbar() {
       }
     }
 
+  const markAsRead =
+    async (notificationId) => {
+
+      try {
+
+        await axios.put(
+          `http://localhost:5000/api/notifications/read/${notificationId}`
+        )
+
+        setNotifications((prev) =>
+          prev.map((item) =>
+            item.id === notificationId
+              ? { ...item, isRead: true }
+              : item
+          )
+        )
+
+      } catch (error) {
+
+        console.log(error)
+
+      }
+    }
+
   const unreadCount =
     notifications.filter(
       (item) => !item.isRead
@@ -102,10 +124,7 @@ export default function Navbar() {
 
       document.documentElement.classList.remove('dark')
 
-      localStorage.setItem(
-        'theme',
-        'light'
-      )
+      localStorage.setItem('theme', 'light')
 
       setDarkMode(false)
 
@@ -113,19 +132,17 @@ export default function Navbar() {
 
       document.documentElement.classList.add('dark')
 
-      localStorage.setItem(
-        'theme',
-        'dark'
-      )
+      localStorage.setItem('theme', 'dark')
 
       setDarkMode(true)
-
     }
   }
 
   const handleLogout = () => {
 
     localStorage.removeItem('user')
+
+    setUser(null)
 
     window.location.href = '/login'
   }
@@ -157,6 +174,32 @@ export default function Navbar() {
           />
 
         </div>
+
+        {!user ? (
+
+          <div className="flex items-center gap-3">
+
+            <Link
+              href="/login"
+              className="px-5 py-2 rounded-full border hover:bg-gray-100 transition"
+            >
+
+              Login
+
+            </Link>
+
+            <Link
+              href="/signup"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-full transition"
+            >
+
+              Sign Up
+
+            </Link>
+
+          </div>
+
+        ) : (
 
         <div className="flex items-center gap-4 relative">
 
@@ -223,9 +266,13 @@ export default function Navbar() {
 
                     notifications.map((notification) => (
 
-                      <div
+                      <button
                         key={notification.id}
-                        className={`flex gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-xl ${
+                        type="button"
+                        onClick={() =>
+                          markAsRead(notification.id)
+                        }
+                        className={`w-full text-left flex gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-xl ${
                           notification.isRead
                             ? ''
                             : 'bg-orange-50 dark:bg-gray-800'
@@ -255,7 +302,7 @@ export default function Navbar() {
 
                         </div>
 
-                      </div>
+                      </button>
 
                     ))
 
@@ -379,6 +426,8 @@ export default function Navbar() {
           )}
 
         </div>
+
+        )}
 
       </div>
 

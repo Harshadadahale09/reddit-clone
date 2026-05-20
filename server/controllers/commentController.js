@@ -10,7 +10,8 @@ exports.createComment = async (
     const {
       content,
       postId,
-      authorId
+      authorId,
+      parentId
     } = req.body
 
     const comment =
@@ -19,7 +20,8 @@ exports.createComment = async (
         data: {
           content,
           postId,
-          authorId
+          authorId,
+          parentId
         },
 
         include: {
@@ -87,15 +89,39 @@ exports.getComments = async (
       await prisma.comment.findMany({
 
         where: {
-          postId
+
+          postId,
+
+          parentId: null
+
         },
 
         include: {
-          author: true
+
+          author: true,
+
+          replies: {
+
+            include: {
+
+              author: true
+
+            },
+
+            orderBy: {
+
+              createdAt: 'asc'
+
+            }
+
+          }
+
         },
 
         orderBy: {
+
           createdAt: 'desc'
+
         }
 
       })
@@ -121,10 +147,18 @@ exports.deleteComment = async (
 
     const { id } = req.params
 
-    await prisma.comment.delete({
+    await prisma.comment.deleteMany({
 
       where: {
-        id
+
+        OR: [
+
+          { id },
+
+          { parentId: id }
+
+        ]
+
       }
 
     })
@@ -151,34 +185,34 @@ exports.editComment = async (
   res
 ) => {
 
-    try {
+  try {
 
-      const { id } = req.params
+    const { id } = req.params
 
-      const { content } =
-        req.body
+    const { content } =
+      req.body
 
-      const updatedComment =
-        await prisma.comment.update({
+    const updatedComment =
+      await prisma.comment.update({
 
-          where: {
-            id
-          },
+        where: {
+          id
+        },
 
-          data: {
-            content
-          }
-
-        })
-
-      res.json(updatedComment)
-
-    } catch (error) {
-
-      res.status(500).json({
-
-        error: error.message
+        data: {
+          content
+        }
 
       })
-    }
+
+    res.json(updatedComment)
+
+  } catch (error) {
+
+    res.status(500).json({
+
+      error: error.message
+
+    })
   }
+}

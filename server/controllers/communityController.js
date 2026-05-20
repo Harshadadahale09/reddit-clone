@@ -122,3 +122,44 @@ exports.getCommunityPosts =
 
     }
   }
+  exports.updateCommunityImages =
+  async (req, res) => {
+
+    try {
+
+      const { id } =
+        req.params
+
+      const {
+        banner,
+        icon
+      } = req.body
+
+      const updatedCommunity =
+        await prisma.community.update({
+
+          where: {
+            id
+          },
+
+          data: {
+            banner,
+            icon
+          }
+
+        })
+
+      res.json(updatedCommunity)
+
+    } catch (error) {
+
+      console.log(error)
+
+      res.status(500).json({
+
+        error: error.message
+
+      })
+
+    }
+  }

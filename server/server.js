@@ -1,7 +1,17 @@
 require('dotenv').config()
 
-const express = require('express')
-const cors = require('cors')
+const express =
+  require('express')
+
+const cors =
+  require('cors')
+
+const prisma =
+  require('./config/prisma')
+
+const messageRoutes =
+  require('./routes/messageRoutes')
+
 const notificationRoutes =
   require('./routes/notificationRoutes')
 
@@ -32,66 +42,151 @@ const uploadRoutes =
 const savedPostRoutes =
   require('./routes/savedPostRoutes')
 
-const app = express()
+const app =
+  express()
 
 app.use(cors())
+
 app.use(express.json())
 
-// Auth Routes
-app.use('/api/auth', authRoutes)
+/* ONLINE STATUS */
 
-// Community Routes
+app.use(async (
+  req,
+  res,
+  next
+) => {
+
+  try {
+
+    const userId =
+      req.headers.userid
+
+    if (userId) {
+
+      await prisma.user.update({
+
+        where: {
+          id: userId
+        },
+
+        data: {
+          isOnline: true
+        }
+
+      })
+
+    }
+
+  } catch (error) {
+
+    console.log(error)
+
+  }
+
+  next()
+
+})
+
+/* AUTH ROUTES */
+
+app.use(
+  '/api/auth',
+  authRoutes
+)
+
+/* COMMUNITY ROUTES */
+
 app.use(
   '/api/communities',
   communityRoutes
 )
 
-// Community Members Routes
+/* COMMUNITY MEMBERS */
+
 app.use(
   '/api/community-members',
   communityMemberRoutes
 )
 
-// Post Routes
-app.use('/api/posts', postRoutes)
+/* POSTS */
 
-// Vote Routes
-app.use('/api/votes', voteRoutes)
+app.use(
+  '/api/posts',
+  postRoutes
+)
 
-// Comment Routes
+/* VOTES */
+
+app.use(
+  '/api/votes',
+  voteRoutes
+)
+
+/* COMMENTS */
+
 app.use(
   '/api/comments',
   commentRoutes
 )
 
-// User Routes
-app.use('/api/users', userRoutes)
+/* USERS */
 
-// Upload Routes
-app.use('/api/upload', uploadRoutes)
+app.use(
+  '/api/users',
+  userRoutes
+)
 
-// Saved Posts Routes
+/* UPLOAD */
+
+app.use(
+  '/api/upload',
+  uploadRoutes
+)
+
+/* SAVED POSTS */
+
 app.use(
   '/api/saved-posts',
   savedPostRoutes
 )
+
+/* NOTIFICATIONS */
+
 app.use(
   '/api/notifications',
   notificationRoutes
 )
 
-// Test Route
-app.get('/', (req, res) => {
+/* CHAT */
 
-  res.send('API Running')
+app.use(
+  '/api/messages',
+  messageRoutes
+)
 
-})
+/* TEST ROUTE */
 
-// Server Start
-app.listen(process.env.PORT, () => {
+app.get('/', (
+  req,
+  res
+) => {
 
-  console.log(
-    `Server running on ${process.env.PORT}`
+  res.send(
+    'API Running'
   )
 
 })
+
+/* SERVER */
+
+app.listen(
+  process.env.PORT,
+  () => {
+
+    console.log(
+      `Server running on ${process.env.PORT}`
+    )
+
+  }
+)

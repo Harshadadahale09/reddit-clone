@@ -27,8 +27,14 @@ export default function ProfilePage() {
   const [posts, setPosts] =
     useState([])
 
+  const [karma, setKarma] =
+    useState(0)
+
   const [loading, setLoading] =
     useState(true)
+
+  const [uploading, setUploading] =
+    useState(false)
 
   useEffect(() => {
 
@@ -40,27 +46,39 @@ export default function ProfilePage() {
       const parsedUser =
         JSON.parse(storedUser)
 
-      setUser(parsedUser)
-
-      fetchUserPosts(
+      fetchUserProfile(
         parsedUser.id
       )
+
+    } else {
+
+      setLoading(false)
 
     }
 
   }, [])
 
-  const fetchUserPosts =
+  const fetchUserProfile =
     async (userId) => {
 
       try {
 
         const res =
           await axios.get(
-            `http://localhost:5000/api/users/${userId}/posts`
+            `http://localhost:5000/api/users/${userId}`
           )
 
-        setPosts(res.data)
+        setUser(
+          res.data.user
+        )
+
+        setPosts(
+          res.data.posts
+        )
+
+        setKarma(
+          res.data.karma || 0
+        )
 
       } catch (error) {
 
@@ -69,6 +87,75 @@ export default function ProfilePage() {
       } finally {
 
         setLoading(false)
+
+      }
+    }
+
+  const handleAvatarUpload =
+    async (e) => {
+
+      try {
+
+        const file =
+          e.target.files[0]
+
+        if (!file) return
+
+        setUploading(true)
+
+        const formData =
+          new FormData()
+
+        formData.append(
+          'image',
+          file
+        )
+
+        const uploadRes =
+          await axios.post(
+
+            'http://localhost:5000/api/upload',
+
+            formData
+
+          )
+
+        const imageUrl =
+          uploadRes.data.imageUrl
+
+        const res =
+          await axios.put(
+
+            `http://localhost:5000/api/users/${user.id}/avatar`,
+
+            {
+              avatar: imageUrl
+            }
+
+          )
+
+        setUser(res.data)
+
+        localStorage.setItem(
+          'user',
+          JSON.stringify(res.data)
+        )
+
+        alert(
+          'Avatar updated!'
+        )
+
+      } catch (error) {
+
+        console.log(error)
+
+        alert(
+          'Upload failed'
+        )
+
+      } finally {
+
+        setUploading(false)
 
       }
     }
@@ -83,45 +170,56 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
 
-          {/* LEFT */}
-
           <div className="hidden lg:block">
 
             <LeftSidebar />
 
           </div>
 
-          {/* MAIN */}
-
           <div className="lg:col-span-2">
-
-            {/* PROFILE HEADER */}
 
             <div className="bg-white dark:bg-gray-900 dark:border-gray-800 rounded-2xl border overflow-hidden mb-5">
 
-              {/* BANNER */}
-
               <div className="h-32 bg-orange-500" />
-
-              {/* USER INFO */}
 
               <div className="p-5">
 
                 <div className="flex items-center gap-4 -mt-16">
 
-                  {/* AVATAR */}
-
                   <div className="w-24 h-24 rounded-full bg-white dark:bg-gray-900 p-1">
 
-                    <div className="w-full h-full rounded-full bg-orange-500 text-white flex items-center justify-center text-4xl font-bold">
+                    <label className="w-full h-full rounded-full overflow-hidden cursor-pointer block relative">
 
-                      {user?.username?.charAt(0)}
+                      {user?.avatar ? (
 
-                    </div>
+                        <img
+                          src={user.avatar}
+                          alt="avatar"
+                          className="w-full h-full object-cover"
+                        />
+
+                      ) : (
+
+                        <div className="w-full h-full rounded-full bg-orange-500 text-white flex items-center justify-center text-4xl font-bold">
+
+                          {user?.username?.charAt(0)}
+
+                        </div>
+
+                      )}
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={
+                          handleAvatarUpload
+                        }
+                      />
+
+                    </label>
 
                   </div>
-
-                  {/* DETAILS */}
 
                   <div className="mt-10">
 
@@ -137,11 +235,19 @@ export default function ProfilePage() {
 
                     </p>
 
+                    {uploading && (
+
+                      <p className="text-sm text-orange-500 mt-1">
+
+                        Uploading...
+
+                      </p>
+
+                    )}
+
                   </div>
 
                 </div>
-
-                {/* STATS */}
 
                 <div className="flex gap-10 mt-6">
 
@@ -165,7 +271,7 @@ export default function ProfilePage() {
 
                     <p className="font-bold text-xl dark:text-white">
 
-                      1.2k
+                      {karma}
 
                     </p>
 
@@ -181,7 +287,9 @@ export default function ProfilePage() {
 
                     <p className="font-bold text-xl dark:text-white">
 
-                      2025
+                      {user?.createdAt
+                        ? new Date(user.createdAt).getFullYear()
+                        : '2025'}
 
                     </p>
 
@@ -198,8 +306,6 @@ export default function ProfilePage() {
               </div>
 
             </div>
-
-            {/* USER POSTS */}
 
             <h2 className="text-2xl font-bold mb-5 dark:text-white">
 
@@ -237,8 +343,6 @@ export default function ProfilePage() {
             )}
 
           </div>
-
-          {/* RIGHT */}
 
           <div className="hidden lg:block">
 

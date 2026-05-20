@@ -36,6 +36,9 @@ export default function CommunityPage() {
   const [members, setMembers] =
     useState(0)
 
+  const [uploading, setUploading] =
+    useState(false)
+
   useEffect(() => {
 
     if (id) {
@@ -51,8 +54,6 @@ export default function CommunityPage() {
     }
 
   }, [id])
-
-  /* POSTS */
 
   const fetchCommunityPosts =
     async () => {
@@ -75,8 +76,6 @@ export default function CommunityPage() {
       }
     }
 
-  /* COMMUNITY */
-
   const fetchCommunityInfo =
     async () => {
 
@@ -97,8 +96,6 @@ export default function CommunityPage() {
 
       }
     }
-
-  /* MEMBERS */
 
   const fetchMembers =
     async () => {
@@ -122,8 +119,6 @@ export default function CommunityPage() {
 
       }
     }
-
-  /* CHECK JOINED */
 
   const checkJoinedStatus =
     async () => {
@@ -154,8 +149,6 @@ export default function CommunityPage() {
 
       }
     }
-
-  /* JOIN / LEAVE */
 
   const handleJoin =
     async () => {
@@ -201,37 +194,190 @@ export default function CommunityPage() {
       }
     }
 
+  const uploadImage =
+    async (file) => {
+
+      const formData =
+        new FormData()
+
+      formData.append(
+        'image',
+        file
+      )
+
+      const res =
+        await axios.post(
+
+          'http://localhost:5000/api/upload',
+
+          formData
+
+        )
+
+      return res.data.imageUrl
+    }
+
+  const handleBannerUpload =
+    async (e) => {
+
+      try {
+
+        const file =
+          e.target.files[0]
+
+        if (!file) return
+
+        setUploading(true)
+
+        const imageUrl =
+          await uploadImage(file)
+
+        const res =
+          await axios.put(
+
+            `http://localhost:5000/api/communities/${id}/images`,
+
+            {
+              banner: imageUrl,
+              icon:
+                community?.icon
+            }
+
+          )
+
+        setCommunity(res.data)
+
+      } catch (error) {
+
+        console.log(error)
+
+      } finally {
+
+        setUploading(false)
+
+      }
+    }
+
+  const handleIconUpload =
+    async (e) => {
+
+      try {
+
+        const file =
+          e.target.files[0]
+
+        if (!file) return
+
+        setUploading(true)
+
+        const imageUrl =
+          await uploadImage(file)
+
+        const res =
+          await axios.put(
+
+            `http://localhost:5000/api/communities/${id}/images`,
+
+            {
+              icon: imageUrl,
+              banner:
+                community?.banner
+            }
+
+          )
+
+        setCommunity(res.data)
+
+      } catch (error) {
+
+        console.log(error)
+
+      } finally {
+
+        setUploading(false)
+
+      }
+    }
+
   return (
 
     <div className="bg-gray-100 dark:bg-black min-h-screen">
 
       <Navbar />
 
-      {/* BANNER */}
+      <div className="relative">
 
-      <div className="h-40 bg-orange-500" />
+        <label className="block cursor-pointer">
+
+          {community?.banner ? (
+
+            <img
+              src={community.banner}
+              alt="banner"
+              className="h-40 w-full object-cover"
+            />
+
+          ) : (
+
+            <div className="h-40 bg-orange-500" />
+
+          )}
+
+          <input
+            type="file"
+            hidden
+            accept="image/*"
+            onChange={
+              handleBannerUpload
+            }
+          />
+
+        </label>
+
+      </div>
 
       <div className="max-w-5xl mx-auto p-5">
-
-        {/* COMMUNITY CARD */}
 
         <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-2xl p-6 mb-5 -mt-20 relative z-[100]">
 
           <div className="flex items-center justify-between">
 
-            {/* LEFT */}
-
             <div className="flex items-center gap-4">
 
-              {/* ICON */}
+              <div className="w-20 h-20 rounded-full border-4 border-white overflow-hidden bg-orange-500">
 
-              <div className="w-20 h-20 rounded-full bg-orange-500 border-4 border-white flex items-center justify-center text-white text-3xl font-bold">
+                <label className="cursor-pointer block w-full h-full">
 
-                {community?.name?.charAt(0)}
+                  {community?.icon ? (
+
+                    <img
+                      src={community.icon}
+                      alt="icon"
+                      className="w-full h-full object-cover"
+                    />
+
+                  ) : (
+
+                    <div className="w-full h-full flex items-center justify-center text-white text-3xl font-bold">
+
+                      {community?.name?.charAt(0)}
+
+                    </div>
+
+                  )}
+
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={
+                      handleIconUpload
+                    }
+                  />
+
+                </label>
 
               </div>
-
-              {/* INFO */}
 
               <div>
 
@@ -247,11 +393,19 @@ export default function CommunityPage() {
 
                 </p>
 
+                {uploading && (
+
+                  <p className="text-sm text-orange-500 mt-1">
+
+                    Uploading...
+
+                  </p>
+
+                )}
+
               </div>
 
             </div>
-
-            {/* BUTTON */}
 
             <button
               type="button"
@@ -272,8 +426,6 @@ export default function CommunityPage() {
           </div>
 
         </div>
-
-        {/* POSTS */}
 
         {posts.map((post) => (
 

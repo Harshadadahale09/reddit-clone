@@ -17,16 +17,25 @@ router.get(
   communityController.getCommunities
 )
 
-/* IMPORTANT */
+/* COMMUNITY POSTS */
 
 router.get(
   '/:id/posts',
   communityController.getCommunityPosts
 )
 
+/* SINGLE COMMUNITY */
+
 router.get(
   '/:id',
   communityController.getCommunityById
+)
+
+/* UPDATE COMMUNITY IMAGES */
+
+router.put(
+  '/:id/images',
+  communityController.updateCommunityImages
 )
 
 module.exports =

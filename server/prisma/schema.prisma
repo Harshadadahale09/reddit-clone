@@ -17,6 +17,10 @@ model User {
 
   password  String
 
+  avatar String?
+
+  isOnline Boolean @default(false)
+
   posts     Post[]
 
   comments  Comment[]
@@ -31,6 +35,9 @@ model User {
 
   notifications Notification[]
 
+  messages Message[]
+
+
 }
 
 model Community {
@@ -40,6 +47,10 @@ model Community {
   name      String   @unique
 
   slug      String   @unique
+
+  banner String?
+
+  icon   String?
 
   posts     Post[]
 
@@ -91,8 +102,13 @@ model Comment {
 
   authorId  String
 
-  createdAt DateTime @default(now())
+  parentId  String?
 
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+
+  replies   Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
 }
 
 model Vote {
@@ -162,6 +178,20 @@ model Notification {
   user      User @relation(fields: [userId], references: [id])
 
   isRead    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+}
+
+model Message {
+
+  id        String   @id @default(cuid())
+
+  content   String
+
+  senderId  String
+
+  sender    User @relation(fields: [senderId], references: [id])
 
   createdAt DateTime @default(now())
 

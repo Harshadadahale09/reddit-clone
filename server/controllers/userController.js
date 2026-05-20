@@ -30,24 +30,40 @@ exports.getUserProfile =
         await prisma.post.findMany({
 
           where: {
-
             authorId: id
+          },
 
+          include: {
+            author: true,
+            community: true,
+            votes: true,
+            comments: true
           },
 
           orderBy: {
-
             createdAt: 'desc'
-
           }
 
         })
 
+      const karma =
+        posts.reduce((total, post) => {
+
+          const postVotes =
+            post.votes.reduce(
+              (sum, vote) =>
+                sum + vote.type,
+              0
+            )
+
+          return total + postVotes
+
+        }, 0)
+
       res.json({
-
         user,
-        posts
-
+        posts,
+        karma
       })
 
     } catch (error) {
@@ -73,23 +89,18 @@ exports.getUserPosts =
         await prisma.post.findMany({
 
           where: {
-
             authorId: id
-
           },
 
           include: {
-
             author: true,
             community: true,
-            votes: true
-
+            votes: true,
+            comments: true
           },
 
           orderBy: {
-
             createdAt: 'desc'
-
           }
 
         })
@@ -97,6 +108,45 @@ exports.getUserPosts =
       res.json(posts)
 
     } catch (error) {
+
+      res.status(500).json({
+
+        error: error.message
+
+      })
+
+    }
+  }
+
+  exports.updateAvatar =
+  async (req, res) => {
+
+    try {
+
+      const { id } =
+        req.params
+
+      const { avatar } =
+        req.body
+
+      const updatedUser =
+        await prisma.user.update({
+
+          where: {
+            id
+          },
+
+          data: {
+            avatar
+          }
+
+        })
+
+      res.json(updatedUser)
+
+    } catch (error) {
+
+      console.log(error)
 
       res.status(500).json({
 

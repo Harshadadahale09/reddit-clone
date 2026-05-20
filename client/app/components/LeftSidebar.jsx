@@ -22,7 +22,8 @@ import {
   Briefcase,
   HelpCircle,
   FileText,
-  Megaphone
+  Megaphone,
+  MessageCircle
 } from 'lucide-react'
 
 export default function LeftSidebar() {
@@ -59,7 +60,7 @@ export default function LeftSidebar() {
 
     <div className="sticky top-20 h-[calc(100vh-90px)] overflow-y-auto">
 
-      <div className="bg-white rounded-2xl border p-4">
+      <div className="bg-white dark:bg-gray-900 dark:border-gray-800 rounded-2xl border p-4">
 
         {/* MAIN MENU */}
 
@@ -101,11 +102,17 @@ export default function LeftSidebar() {
             href="/gaming"
           />
 
+          <SidebarItem
+            icon={<MessageCircle size={20} />}
+            text="Community Chat"
+            href="/chat"
+          />
+
         </div>
 
         {/* DIVIDER */}
 
-        <div className="border-t my-4"></div>
+        <div className="border-t dark:border-gray-800 my-4"></div>
 
         {/* CUSTOM FEEDS */}
 
@@ -117,19 +124,22 @@ export default function LeftSidebar() {
 
           </h2>
 
-          <button className="w-full bg-gray-100 hover:bg-gray-200 transition rounded-full py-2 text-sm font-semibold flex items-center justify-center gap-2">
+          <Link
+            href="/custom-feed"
+            className="w-full bg-gray-100 dark:bg-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition rounded-full py-2 text-sm font-semibold flex items-center justify-center gap-2"
+          >
 
             <Plus size={16} />
 
             Create Custom Feed
 
-          </button>
+          </Link>
 
         </div>
 
         {/* DIVIDER */}
 
-        <div className="border-t my-4"></div>
+        <div className="border-t dark:border-gray-800 my-4"></div>
 
         {/* COMMUNITIES */}
 
@@ -156,12 +166,24 @@ export default function LeftSidebar() {
               <Link
                 key={community.id}
                 href={`/community/${community.id}`}
-                className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 transition text-sm font-medium"
+                className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm font-medium dark:text-white"
               >
 
-                <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-orange-500 text-white flex items-center justify-center font-bold">
 
-                  {community.name.charAt(0)}
+                  {community.icon ? (
+
+                    <img
+                      src={community.icon}
+                      alt="icon"
+                      className="w-full h-full object-cover"
+                    />
+
+                  ) : (
+
+                    community.name.charAt(0)
+
+                  )}
 
                 </div>
 
@@ -181,7 +203,7 @@ export default function LeftSidebar() {
 
         {/* DIVIDER */}
 
-        <div className="border-t my-4"></div>
+        <div className="border-t dark:border-gray-800 my-4"></div>
 
         {/* RESOURCES */}
 
@@ -247,7 +269,7 @@ function SidebarItem({
 
     <Link
       href={href}
-      className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 transition text-sm font-medium"
+      className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm font-medium dark:text-white"
     >
 
       {icon}

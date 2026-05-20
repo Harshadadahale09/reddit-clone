@@ -1,13 +1,18 @@
-const express = require('express')
+const express =
+  require('express')
 
-const router = express.Router()
+const router =
+  express.Router()
 
 const {
 
   getUserProfile,
-  getUserPosts
+  getUserPosts,
+  updateAvatar
 
-} = require('../controllers/userController')
+} = require(
+  '../controllers/userController'
+)
 
 // User Profile
 router.get(
@@ -21,4 +26,11 @@ router.get(
   getUserPosts
 )
 
-module.exports = router
+// Update Avatar
+router.put(
+  '/:id/avatar',
+  updateAvatar
+)
+
+module.exports =
+  router
