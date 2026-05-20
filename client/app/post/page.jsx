@@ -6,7 +6,6 @@ import { useParams } from 'next/navigation'
 
 import Navbar from '../components/Navbar'
 import CommentSection from '../components/CommentSection'
-
 export default function SinglePostPage() {
 
   const params = useParams()
