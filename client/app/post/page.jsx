@@ -11,68 +11,49 @@ import {
   useParams
 } from 'next/navigation'
 
-
-import Navbar from '../../components/Navbar'
-
-import CommentSection from '../../components/CommentSection'
-
-
 import Navbar from '../components/Navbar'
 
 import CommentSection from '../components/CommentSection'
 
 export default function SinglePostPage() {
 
-  const params =
-    useParams()
+  const params = useParams()
 
-  const id =
-    params.id
+  const id = params.id
 
-  const [post, setPost] =
-    useState(null)
+  const [post, setPost] = useState(null)
 
   useEffect(() => {
 
     if (id) {
-
       fetchPost()
-
     }
 
   }, [id])
 
-  const fetchPost =
-    async () => {
+  const fetchPost = async () => {
 
-      try {
+    try {
 
-        const res =
-          await axios.get(
+      const res = await axios.get(
+        `http://localhost:5000/api/posts/${id}`
+      )
 
-            `http://localhost:5000/api/posts/${id}`
+      setPost(res.data)
 
-          )
+    } catch (error) {
 
-        setPost(res.data)
+      console.log(error)
 
-      } catch (error) {
-
-        console.log(error)
-
-      }
     }
+  }
 
   if (!post) {
 
     return (
-
       <div className="p-10 text-xl">
-
         Loading...
-
       </div>
-
     )
   }
 
@@ -86,40 +67,21 @@ export default function SinglePostPage() {
 
         <div className="bg-white rounded-2xl border p-6">
 
-          {/* COMMUNITY */}
-
           <p className="text-sm text-gray-500 mb-2">
-
             c/{post.community?.name}
-
           </p>
-
-          {/* TITLE */}
 
           <h1 className="text-4xl font-bold mb-4">
-
             {post.title}
-
           </h1>
 
-          {/* AUTHOR */}
-
           <p className="text-gray-500 mb-5">
-
-            Posted by u/
-            {post.author?.username}
-
+            Posted by u/{post.author?.username}
           </p>
-
-          {/* CONTENT */}
 
           <p className="text-lg text-gray-700 mb-6">
-
             {post.content}
-
           </p>
-
-          {/* IMAGE */}
 
           {post.imageUrl && (
 
@@ -130,8 +92,6 @@ export default function SinglePostPage() {
             />
 
           )}
-
-          {/* COMMENTS */}
 
           <CommentSection
             postId={post.id}
